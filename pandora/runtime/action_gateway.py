@@ -232,7 +232,14 @@ class IntentBuilder:
     """Normalised constructors for ActionEnvelopes by origin. Use these instead of building envelopes inline."""
 
     @staticmethod
-    def _build(source: ActionSource, intent: str, actor: str, payload: dict | None, context: dict | None, parent_intent_id: str | None = None) -> ActionEnvelope:
+    def _build(
+        source: ActionSource,
+        intent: str,
+        actor: str,
+        payload: dict | None,
+        context: dict | None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
         return ActionEnvelope(
             intent=intent,
             source=source,
@@ -243,32 +250,100 @@ class IntentBuilder:
         )
 
     @staticmethod
-    def from_voice(intent: str, actor: str = "voice", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.VOICE, intent, actor, payload, context, parent_intent_id)
+    def from_voice(
+        intent: str,
+        actor: str = "voice",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.VOICE, intent, actor, payload, context, parent_intent_id
+        )
 
     @staticmethod
-    def from_dashboard(intent: str, actor: str = "dashboard", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.DASHBOARD, intent, actor, payload, context, parent_intent_id)
+    def from_dashboard(
+        intent: str,
+        actor: str = "dashboard",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.DASHBOARD, intent, actor, payload, context, parent_intent_id
+        )
 
     @staticmethod
-    def from_planner(intent: str, actor: str = "planner", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.PLANNER, intent, actor, payload, context, parent_intent_id)
+    def from_planner(
+        intent: str,
+        actor: str = "planner",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.PLANNER, intent, actor, payload, context, parent_intent_id
+        )
 
     @staticmethod
-    def from_swarm(intent: str, actor: str = "swarm", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.SWARM, intent, actor, payload, context, parent_intent_id)
+    def from_swarm(
+        intent: str,
+        actor: str = "swarm",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.SWARM, intent, actor, payload, context, parent_intent_id
+        )
 
     @staticmethod
-    def from_financial(intent: str, actor: str = "financial", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.FINANCIAL, intent, actor, payload, context, parent_intent_id)
+    def from_financial(
+        intent: str,
+        actor: str = "financial",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.FINANCIAL, intent, actor, payload, context, parent_intent_id
+        )
 
     @staticmethod
-    def from_device(intent: str, actor: str = "device", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.DRONE if intent.startswith("drone.") else ActionSource.SYSTEM, intent, actor, payload, context, parent_intent_id)
+    def from_device(
+        intent: str,
+        actor: str = "device",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.DRONE if intent.startswith("drone.") else ActionSource.SYSTEM,
+            intent,
+            actor,
+            payload,
+            context,
+            parent_intent_id,
+        )
 
     @staticmethod
-    def from_workflow(intent: str, actor: str = "workflow", *, payload=None, context=None, parent_intent_id: str | None = None) -> ActionEnvelope:
-        return IntentBuilder._build(ActionSource.WORKFLOW, intent, actor, payload, context, parent_intent_id)
+    def from_workflow(
+        intent: str,
+        actor: str = "workflow",
+        *,
+        payload=None,
+        context=None,
+        parent_intent_id: str | None = None,
+    ) -> ActionEnvelope:
+        return IntentBuilder._build(
+            ActionSource.WORKFLOW, intent, actor, payload, context, parent_intent_id
+        )
 
 
 class ActionGateway:
@@ -310,9 +385,7 @@ class ActionGateway:
     def register_handler(self, intent_pattern: str, handler: HandlerFn) -> HandlerHandle:
         """Register an async handler. Patterns use fnmatch (e.g. 'financial.trade.*'). Returns a HandlerHandle."""
         if not asyncio.iscoroutinefunction(handler):
-            raise TypeError(
-                f"Handler for {intent_pattern!r} must be an async function"
-            )
+            raise TypeError(f"Handler for {intent_pattern!r} must be an async function")
         entry = (intent_pattern, handler)
         self._handlers.append(entry)
         return HandlerHandle(_gateway=self, _entry=entry)
@@ -333,7 +406,11 @@ class ActionGateway:
 
     def metrics_snapshot(self) -> dict[str, Any]:
         m = self._metrics
-        avg = (m["gateway_latency_ms_sum"] / m["gateway_latency_ms_count"]) if m["gateway_latency_ms_count"] else 0.0
+        avg = (
+            (m["gateway_latency_ms_sum"] / m["gateway_latency_ms_count"])
+            if m["gateway_latency_ms_count"]
+            else 0.0
+        )
         return {
             **{k: v for k, v in m.items() if not k.startswith("gateway_latency_ms_")},
             "gateway_latency_ms_avg": avg,
@@ -374,7 +451,12 @@ class ActionGateway:
             # For now, we'll use a simple heuristic: increment depth if parent exists
             lineage_depth = 1
 
-        result = ActionResult(envelope_id=envelope.id, status=ActionStatus.ERROR, parent_intent_id=envelope.parent_intent_id, lineage_depth=lineage_depth)
+        result = ActionResult(
+            envelope_id=envelope.id,
+            status=ActionStatus.ERROR,
+            parent_intent_id=envelope.parent_intent_id,
+            lineage_depth=lineage_depth,
+        )
 
         try:
             # 1. Risk
@@ -413,7 +495,6 @@ class ActionGateway:
                     result.status = ActionStatus.REJECTED_APPROVAL
                     result.error = approval.reason
                     return result
-
 
             # 5. Execute
             handler = self._resolve_handler(envelope.intent)
