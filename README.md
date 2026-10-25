@@ -36,13 +36,13 @@ The action gateway uses the Python standard library. Development requirements ar
 
 ## Safety model
 
-The default risk classifier allows only explicitly recognized read-only/no-op prefixes as low risk. High-risk intents are classified as high, and unclassified intents are treated as medium risk and require explicit approval. Without an approval adapter, approval is rejected. Caller-controlled context flags cannot override the approval gate.
+The default risk classifier treats only three exact intents as low risk: `noop.ping`, `status.get`, and `health.check`. Known high-impact intent families are classified as high risk; every other intent is medium risk and requires approval. The default approval adapter rejects the request. Without an approval adapter, approval is rejected. Caller-controlled context flags cannot override the approval gate.
 
 This is defense-in-depth, not a security guarantee: code that registers handlers remains trusted code and must be reviewed.
 
 ## Engineering checks
 
-CI runs unit tests, selected Ruff checks, a Git-history secret scan, and dependency auditing. The public repository starts from a single clean root commit; its history does not include the private implementation's earlier commits.
+CI is configured for unit tests, Ruff lint and formatting checks, Python byte-compilation, a scoped dependency audit, and a Gitleaks Git-history scan. The account's GitHub-hosted runners previously refused to start because of an account billing/spending-limit issue; the checks were independently run in an isolated sandbox. The public repository starts from a single clean root commit; its history does not include the private implementation's earlier commits.
 
 ## License
 
