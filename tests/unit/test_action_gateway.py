@@ -90,7 +90,7 @@ async def test_approval_granted_executes():
         return ApprovalOutcome(approved=True, approver="alice")
 
     gw = ActionGateway(approval=approve)
-    gw.register_handler("drone.*", _ok_handler)
+    gw.register_handler("device.write.*", _ok_handler)
     result = await gw.submit(_env("device.write.test"))
     assert result.status == ActionStatus.EXECUTED
     assert result.approval and result.approval.approved
