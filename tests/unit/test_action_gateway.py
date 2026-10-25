@@ -161,3 +161,13 @@ async def test_caller_context_cannot_bypass_high_risk_approval():
     assert result.status == ActionStatus.REJECTED_APPROVAL
     assert result.approval is not None
     assert result.approval.approved is False
+
+
+@pytest.mark.asyncio
+async def test_unverified_read_intent_is_not_automatically_low_risk():
+    gw = ActionGateway()
+    gw.register_handler("read.*", _ok_handler)
+    result = await gw.submit(_env("read.secrets"))
+    assert result.status == ActionStatus.REJECTED_APPROVAL
+    assert result.approval is not None
+    assert result.approval.approved is False
