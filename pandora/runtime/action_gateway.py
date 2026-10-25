@@ -139,31 +139,33 @@ HandlerFn = Callable[[ActionEnvelope], Awaitable[Any]]
 
 
 def _default_risk(envelope: ActionEnvelope) -> RiskAssessment:
-    """Classify known high-risk intents and fail closed for unclassified intents."""
+    """Classify known high-risk intents; default unknown intents to approval-required."""
     high_prefixes = (
         "financial.",
         "drone.",
         "cybersecurity.",
-        "device.write",
+        "device.",
         "system.",
         "exec.",
         "shell.",
         "network.",
+        "filesystem.",
+        "browser.",
+        "credential.",
+        "process.",
     )
     if any(envelope.intent.startswith(prefix) for prefix in high_prefixes):
         return RiskAssessment(0.9, RiskLevel.HIGH, ["default high-risk intent prefix"])
 
-    read_only_prefixes = ("noop.", "read.", "query.", "status.", "health.")
-    if any(envelope.intent.startswith(prefix) for prefix in read_only_prefixes):
-        return RiskAssessment(0.1, RiskLevel.LOW, ["known read-only intent prefix"])
+    explicitly_safe_intents = {"noop.ping", "status.get", "health.check"}
+    if envelope.intent in explicitly_safe_intents:
+        return RiskAssessment(0.1, RiskLevel.LOW, ["explicitly allowlisted read-only intent"])
 
     return RiskAssessment(
         0.5,
         RiskLevel.MEDIUM,
         ["unclassified intent requires an explicit risk policy"],
     )
-
-
 def _default_policy(envelope: ActionEnvelope, risk: RiskAssessment) -> PolicyEvaluation:
     if risk.level == RiskLevel.CRITICAL:
         return PolicyEvaluation(PolicyDecision.DENY, "critical risk denied by default policy")
