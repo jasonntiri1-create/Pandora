@@ -21,9 +21,10 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements-dev.txt
       - run: ruff check pandora tests
+      - run: ruff format --check pandora tests
       - run: python -m compileall -q pandora
       - run: python -m pytest -q
-      - run: python -m pip_audit
+      - run: python -m pip_audit -r requirements-dev.txt
 
   secret-scan:
     runs-on: ubuntu-latest
