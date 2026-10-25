@@ -166,6 +166,8 @@ def _default_risk(envelope: ActionEnvelope) -> RiskAssessment:
         RiskLevel.MEDIUM,
         ["unclassified intent requires an explicit risk policy"],
     )
+
+
 def _default_policy(envelope: ActionEnvelope, risk: RiskAssessment) -> PolicyEvaluation:
     if risk.level == RiskLevel.CRITICAL:
         return PolicyEvaluation(PolicyDecision.DENY, "critical risk denied by default policy")
